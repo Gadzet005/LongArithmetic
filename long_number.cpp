@@ -32,7 +32,7 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
     }
 
     reverseDigits();
-    normilizeDigits();
+    removeZeros();
 }
 
 LongNumber::LongNumber(long double num): 
@@ -44,7 +44,7 @@ LongNumber operator ""_LN (long double num) {
 
 
 // Удаляет незначащие нули из целой части
-void LongNumber::normilizeDigits() {
+void LongNumber::removeZeros() {
     while (exp > 0 && digits.size() > 0 && getDigit(-1) == 0) {
         digits.pop_back();
         exp--;
@@ -58,7 +58,7 @@ void LongNumber::reverseDigits() {
 }
 
 
-int LongNumber::getDigit (int idx) const {
+int LongNumber::getDigit(int idx) const {
     if (idx < 0 && idx >= -digits.size()) {
         return digits[digits.size() + idx];
     }
@@ -68,13 +68,17 @@ int LongNumber::getDigit (int idx) const {
     return 0;
 }
 
-void LongNumber::setDigit (int idx, char value) {
+void LongNumber::setDigit(int idx, char value) {
     if (idx < digits.size()) {
         digits[idx] = value;
     } else {
         digits.push_back(value);
         exp++;
     }
+}
+
+void LongNumber::changeDigit(int idx, char value) {
+    setDigit(idx, getDigit(idx) + value);
 }
 
 
@@ -158,7 +162,7 @@ LongNumber& LongNumber::operator += (const LongNumber& other) {
     // Если разные знаки, сводим сложение к вычитанию
     if (sign != other.sign) {
         *this -= -other;
-        return *this; 
+        return *this;
     }
 
     int precDiff = precision - other.precision;
@@ -167,22 +171,27 @@ LongNumber& LongNumber::operator += (const LongNumber& other) {
     
     int digitsCount = min(precision, other.precision) + max(exp, other.exp);
     for (int i = 0; i < digitsCount; i++) {
-        int sm = getDigit(thisOffset + i) + other.getDigit(otherOffset + i);
+        int sum = getDigit(thisOffset + i) + other.getDigit(otherOffset + i);
 
         // Текущий разряд
-        setDigit(thisOffset + i, sm % 10);
+        setDigit(thisOffset + i, sum % 10);
 
         // Перенос единицы на следующий разряд
-        if (sm >= 10) {
-            setDigit(
-                thisOffset + i + 1, getDigit(thisOffset + i + 1) + 1
-            );
+        if (sum >= 10) {
+            changeDigit(thisOffset + i + 1, 1);
         }
     }
 
-    normilizeDigits();
+    removeZeros();
     return *this;
 }
+
+LongNumber operator + (const LongNumber& l, const LongNumber& r) {
+    LongNumber temp(r);
+    temp += l;
+    return temp;
+}
+
 
 LongNumber& LongNumber::operator -= (const LongNumber& other) {
     // Если разные знаки, сводим вычитание к сложению
@@ -209,24 +218,17 @@ LongNumber& LongNumber::operator -= (const LongNumber& other) {
         int sm = getDigit(thisOffset + i) - other.getDigit(otherOffset + i);
         if (sm < 0) {
             sm += 10;
-            setDigit(thisOffset + i + 1, getDigit(thisOffset + i + 1) - 1);
+            changeDigit(thisOffset + i + 1, -1);
         }
         setDigit(thisOffset + i, sm);
     }
 
-    normilizeDigits();
+    removeZeros();
 
     return *this;
 }
 
-
-LongNumber operator + (const LongNumber& r, const LongNumber& l) {
-    LongNumber temp(r);
-    temp += l;
-    return temp;
-}
-
-LongNumber operator - (const LongNumber& r, const LongNumber& l) {
+LongNumber operator - (const LongNumber& l, const LongNumber& r) {
     LongNumber temp(r);
     temp -= l;
     return temp;
@@ -238,3 +240,28 @@ LongNumber LongNumber::operator - () const {
     return tmp;
 }
 
+
+LongNumber& LongNumber::operator *= (const LongNumber& other) {
+    *this = *this * other;
+    return *this;
+}
+
+LongNumber operator * (const LongNumber& l, const LongNumber& r) {
+    LongNumber result;
+    result.precision = r.precision + l.precision;
+    result.sign = l.sign != r.sign;
+
+    for (int i = 0; i < l.digits.size(); i++) {
+        for (int j = 0; j < r.digits.size(); j++) {
+            int change = result.getDigit(i + j) + l.digits[i] * r.digits[j];
+            result.setDigit(i + j, change % 10);
+            if (change >= 10) {
+                result.changeDigit(i + j + 1, change / 10);
+            }
+        }
+    }
+
+    result.exp = max(result.exp - result.precision, 0);
+    result.removeZeros();
+    return result;
+}
