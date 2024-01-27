@@ -16,7 +16,7 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
     num = modf(num, &intPart);
     while (intPart >= 1) {
         long double mod = fmod(intPart, 10);
-        digits.push_back(static_cast<char>(mod));
+        digits.push_back(mod);
         intPart /= 10;
         exp++;
     }
@@ -26,8 +26,7 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
     while (prec > 0) {
         num *= 10;
         num = modf(num, &intPart);
-        long double mod = fmod(intPart, 10);
-        digits.push_back(static_cast<char>(mod));
+        digits.push_back(intPart);
         prec--;
     }
 
@@ -94,6 +93,7 @@ string LongNumber::toString() const {
     int zeroCounter = 0;
     bool haveDigitAfterPoint = false;
     for (int i = 0; i < digits.size(); i++) {
+        // Разделяем целую и дробную часть
         if (i == exp) {
             for (int j = 0; j < zeroCounter; j++) {
                 result.push_back('0');
@@ -241,11 +241,6 @@ LongNumber LongNumber::operator - () const {
 }
 
 
-LongNumber& LongNumber::operator *= (const LongNumber& other) {
-    *this = *this * other;
-    return *this;
-}
-
 LongNumber operator * (const LongNumber& l, const LongNumber& r) {
     LongNumber result;
     result.precision = r.precision + l.precision;
@@ -264,4 +259,9 @@ LongNumber operator * (const LongNumber& l, const LongNumber& r) {
     result.exp = max(result.exp - result.precision, 0);
     result.removeZeros();
     return result;
+}
+
+LongNumber& LongNumber::operator *= (const LongNumber& other) {
+    *this = *this * other;
+    return *this;
 }
