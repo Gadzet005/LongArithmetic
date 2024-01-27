@@ -158,80 +158,71 @@ bool operator < (const LongNumber& l, const LongNumber& r) {
 }
 
 
-LongNumber& LongNumber::operator += (const LongNumber& other) {
+LongNumber operator + (const LongNumber& l, const LongNumber& r) {
     // Если разные знаки, сводим сложение к вычитанию
-    if (sign != other.sign) {
-        *this -= -other;
-        return *this;
+    if (l.sign != r.sign) {
+        return l - (-r);
     }
 
-    int precDiff = precision - other.precision;
-    int thisOffset = precDiff > 0 ? precDiff : 0;
-    int otherOffset = precDiff < 0 ? -precDiff : 0;
+    // Выбираем число с наибольшей точностью
+    LongNumber result = l.precision > r.precision ? l : r;
+    const LongNumber& other = l.precision > r.precision ? r : l;
     
-    int digitsCount = min(precision, other.precision) + max(exp, other.exp);
+    int offset = abs(l.precision - r.precision);
+    int digitsCount = min(l.precision, r.precision) + max(l.exp, r.exp);
     for (int i = 0; i < digitsCount; i++) {
-        int sum = getDigit(thisOffset + i) + other.getDigit(otherOffset + i);
-
+        int sum = result.getDigit(offset + i) + other.getDigit(i);
         // Текущий разряд
-        setDigit(thisOffset + i, sum % 10);
-
+        result.setDigit(offset + i, sum % 10);
         // Перенос единицы на следующий разряд
         if (sum >= 10) {
-            changeDigit(thisOffset + i + 1, 1);
+            result.changeDigit(offset + i + 1, 1);
         }
     }
 
-    removeZeros();
+    result.removeZeros();
+    return result;
+}
+
+LongNumber& LongNumber::operator += (const LongNumber& other) {
+    *this = *this + other;
     return *this;
 }
 
-LongNumber operator + (const LongNumber& l, const LongNumber& r) {
-    LongNumber temp(r);
-    temp += l;
-    return temp;
-}
 
-
-LongNumber& LongNumber::operator -= (const LongNumber& other) {
+LongNumber operator - (const LongNumber& l, const LongNumber& r) {
     // Если разные знаки, сводим вычитание к сложению
-    if (sign != other.sign) {
-        *this += -other;
-        return *this; 
+    if (l.sign != r.sign) {
+        return l + (-r);
     }
 
     // Вычитаем из большего меньшее, если это не так, то меняем слагаемые местами со сменой знака
-    if ((!sign && other > *this) || (sign && other < *this)) {
-        LongNumber tmp = other;
-        tmp -= *this;
-        *this = tmp;
-        this->sign = !(this->sign);
-        return *this;
+    if (l > r == l.sign) {
+        return -(r - l);
     }
 
-    int precDiff = precision - other.precision;
-    int thisOffset = precDiff > 0 ? precDiff : 0;
-    int otherOffset = precDiff < 0 ? -precDiff : 0;
-    
-    int digitsCount = min(precision, other.precision) + max(exp, other.exp);
+    // Результат будет иметь наибольшую точность
+    LongNumber result = LongNumber(0, max(l.precision, r.precision)) + l;
+
+    int offset = result.precision - r.precision;
+    int digitsCount = min(result.precision, r.precision) + max(result.exp, r.exp);
     for (int i = 0; i < digitsCount; i++) {
-        int sm = getDigit(thisOffset + i) - other.getDigit(otherOffset + i);
+        int sm = result.getDigit(offset + i) - r.getDigit(i);
         if (sm < 0) {
-            sm += 10;
-            changeDigit(thisOffset + i + 1, -1);
+            result.setDigit(offset + i, sm + 10);
+            result.changeDigit(offset + i + 1, -1);
+        } else {
+            result.setDigit(offset + i, sm);
         }
-        setDigit(thisOffset + i, sm);
     }
 
-    removeZeros();
-
-    return *this;
+    result.removeZeros();
+    return result;
 }
 
-LongNumber operator - (const LongNumber& l, const LongNumber& r) {
-    LongNumber temp(r);
-    temp -= l;
-    return temp;
+LongNumber& LongNumber::operator -= (const LongNumber& other) {
+    *this = *this - other;
+    return *this;
 }
 
 LongNumber LongNumber::operator - () const {

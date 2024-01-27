@@ -41,6 +41,8 @@ public:
     LongNumber& operator /= (const LongNumber& other);
 
     friend bool operator > (const LongNumber&, const LongNumber&);
+    friend LongNumber operator - (const LongNumber&, const LongNumber&);
+    friend LongNumber operator + (const LongNumber&, const LongNumber&);
     friend LongNumber operator * (const LongNumber&, const LongNumber&);
 };
 
