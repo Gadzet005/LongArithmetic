@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <stdexcept>
 
 
 using namespace std;
@@ -20,28 +21,38 @@ private:
 
     void normilizeDigits();
     void reverseDigits();
+    
+    int getDigit (int idx) const;
+    void setDigit (int idx, char value);
 
 public:
     LongNumber();
-    LongNumber(double num);
-    LongNumber(double num, int prec);
+    LongNumber(long double num);
+    LongNumber(long double num, int prec);
 
     string toString() const;
 
-    LongNumber& operator+= (const LongNumber& other);
-    LongNumber& operator-= (const LongNumber& other);
-    LongNumber& operator*= (const LongNumber& other);
-    LongNumber& operator/= (const LongNumber& other);
+    LongNumber operator - () const;
 
-    bool operator== (const LongNumber& other) const;
-    bool operator!= (const LongNumber& other) const;
-    bool operator> (const LongNumber& other) const;
-    bool operator< (const LongNumber& other) const;
+    LongNumber& operator += (const LongNumber& other);
+    LongNumber& operator -= (const LongNumber& other);
+    LongNumber& operator *= (const LongNumber& other);
+    LongNumber& operator /= (const LongNumber& other);
+
+    friend bool operator > (const LongNumber& l, const LongNumber& r);
+    friend bool operator < (const LongNumber& l, const LongNumber& r);
 };
+
+LongNumber operator ""_LN (long double num);
 
 ostream& operator<< (ostream& out, const LongNumber num);
 
-LongNumber operator+ (const LongNumber& r, const LongNumber& l);
-LongNumber operator- (const LongNumber& r, const LongNumber& l);
-LongNumber operator* (const LongNumber& r, const LongNumber& l);
-LongNumber operator/ (const LongNumber& r, const LongNumber& l);
+LongNumber operator + (const LongNumber& r, const LongNumber& l);
+LongNumber operator - (const LongNumber& r, const LongNumber& l);
+LongNumber operator * (const LongNumber& r, const LongNumber& l);
+LongNumber operator / (const LongNumber& r, const LongNumber& l);
+
+bool operator == (const LongNumber& l, const LongNumber& r);
+bool operator != (const LongNumber& l, const LongNumber& r);
+bool operator > (const LongNumber& l, const LongNumber& r);
+bool operator < (const LongNumber& l, const LongNumber& r);

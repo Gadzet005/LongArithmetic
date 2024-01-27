@@ -4,12 +4,12 @@
 #include "long_number.hpp"
 
 int main() {
-    LongNumber a(1.23123, 5);
-    LongNumber b(8.67, 2);
+    LongNumber a = -10.891;
+    LongNumber b = 5.491;
 
     cout << a << endl;
     cout << b << endl;
-    cout << a + 1231 << endl;
+    cout << b - a << endl;
 
     return 0;
 }
