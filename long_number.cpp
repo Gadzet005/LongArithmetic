@@ -2,11 +2,11 @@
 
 
 LongNumber::LongNumber():
-    exp(), sign(), precision(LongNumber::DEFAULT_PRECISION) {}
+    exp(1), sign(), digits(1, 0), precision(LongNumber::DEFAULT_PRECISION) {}
 
 LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
-    if (prec <= 0) {
-        throw invalid_argument("Точность должна быть > 0");
+    if (prec < 0) {
+        throw invalid_argument("Точность должна быть >= 0");
     }
 
     sign = num < 0;
@@ -54,10 +54,30 @@ void LongNumber::removeZeros() {
     }
 }
 
+// Меняет порядок разрядов на противоположный
 void LongNumber::reverseDigits() {
     for (int i = 0; i < digits.size() / 2; i++) {
         swap(digits[i], digits[digits.size() - i - 1]);
     }
+}
+
+// Делает дробную часть целой
+LongNumber LongNumber::removePoint() const {
+    LongNumber tmp = *this;
+    tmp.exp += tmp.precision;
+    tmp.precision = 0;
+    tmp.removeZeros();
+    return tmp;
+}
+
+// Вспомогаетльный метод для поиска очередной цифры при делении
+int LongNumber::findDivDigit(LongNumber& num1, const LongNumber& num2) {
+    int n = 0;
+    while (num1 >= num2) {
+        num1 -= num2;
+        n++;
+    }
+    return n;
 }
 
 
@@ -85,6 +105,13 @@ void LongNumber::changeDigit(int idx, char value) {
 }
 
 
+LongNumber LongNumber::getAbs() const {
+    LongNumber tmp = *this;
+    tmp.sign = 0;
+    return tmp;
+}
+
+
 string LongNumber::toString() const {
     string result;
     if (sign) {
@@ -92,7 +119,7 @@ string LongNumber::toString() const {
     }
 
     int zeroCounter = 0;
-    bool haveDigitAfterPoint = false;
+    bool haveDigitAfterPoint = true;
     for (int i = 0; i < digits.size(); i++) {
         // Разделяем целую и дробную часть
         if (i == exp) {
@@ -119,6 +146,11 @@ string LongNumber::toString() const {
 
     if (!haveDigitAfterPoint) {
         result.push_back('0');
+    }
+    if (precision == 0) {
+        for (int j = 0; j < zeroCounter; j++) {
+            result.push_back('0');
+        }
     }
 
     return result;
@@ -156,6 +188,32 @@ bool operator > (const LongNumber& l, const LongNumber& r) {
 
 bool operator < (const LongNumber& l, const LongNumber& r) {
     return r > l;
+}
+
+bool operator == (const LongNumber& l, const LongNumber& r) {
+    if (l.sign != r.sign || l.exp != r.exp) {
+        return false;
+    }
+
+    int digitsCount = l.exp + min(l.precision, r.precision);
+    for (int i = 0; i < digitsCount; i++) {
+        if (l.getDigit(-i - 1) != r.getDigit(-i - 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator != (const LongNumber& l, const LongNumber& r) {
+    return !(l == r);
+}
+
+bool operator >= (const LongNumber& l, const LongNumber& r) {
+    return (l > r) || (l == r);
+}
+
+bool operator <= (const LongNumber& l, const LongNumber& r) {
+    return r >= l;
 }
 
 
@@ -257,3 +315,56 @@ LongNumber& LongNumber::operator *= (const LongNumber& other) {
     *this = *this * other;
     return *this;
 }
+
+
+LongNumber operator / (const LongNumber& l, const LongNumber& r) {
+    if (r == 0) {
+        throw runtime_error("Деление на 0");
+    }
+
+    LongNumber result(0, 0);
+    result.digits.clear();
+    result.exp = 0;
+    result.sign = l.sign != r.sign;
+    result.precision = l.precision;
+
+    // Считаем, что числа целые
+    LongNumber left = l.removePoint();
+    LongNumber right = r.removePoint();
+
+    const LongNumber ten = LongNumber(10, 0);
+
+    // Целая часть частного
+    int digitIdx = 0;
+    LongNumber cur(0, 0);
+    while (digitIdx < left.exp) {
+        LongNumber curDigit = LongNumber(left.getDigit(-digitIdx - 1), 0);
+        cur = ten * cur + curDigit;
+        result.digits.push_back(LongNumber::findDivDigit(cur, right));
+        result.exp++;
+        digitIdx++;
+    }
+
+    // Дробная часть частного
+    for (int i = 0; i < r.precision; i++) {
+        cur *= ten;
+        result.digits.push_back(LongNumber::findDivDigit(cur, right));
+    }
+
+    result.reverseDigits();
+
+    int precDiff = r.precision - l.precision;
+    for (int i = 0; i <= -(result.exp + precDiff); i++) {
+        result.digits.push_back(0);
+    }
+    result.exp = max(result.exp + precDiff, 1);
+
+    result.removeZeros();
+    return result;
+}
+
+LongNumber& LongNumber::operator /= (const LongNumber& other) {
+    *this = *this / other;
+    return *this;
+}
+

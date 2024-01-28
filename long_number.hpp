@@ -21,9 +21,12 @@ private:
 
     void removeZeros();
     void reverseDigits();
+    LongNumber removePoint() const;
+
+    static int findDivDigit(LongNumber& num1, const LongNumber& num2);
     
-    int getDigit (int idx) const;
-    void setDigit (int idx, char value);
+    int getDigit(int idx) const;
+    void setDigit(int idx, char value);
     void changeDigit(int idx, char value);
 
 public:
@@ -33,6 +36,8 @@ public:
 
     string toString() const;
 
+    LongNumber getAbs() const;
+
     LongNumber operator - () const;
 
     LongNumber& operator += (const LongNumber& other);
@@ -41,9 +46,11 @@ public:
     LongNumber& operator /= (const LongNumber& other);
 
     friend bool operator > (const LongNumber&, const LongNumber&);
+    friend bool operator == (const LongNumber&, const LongNumber&);
     friend LongNumber operator - (const LongNumber&, const LongNumber&);
     friend LongNumber operator + (const LongNumber&, const LongNumber&);
     friend LongNumber operator * (const LongNumber&, const LongNumber&);
+    friend LongNumber operator / (const LongNumber&, const LongNumber&);
 };
 
 LongNumber operator ""_LN (long double num);
@@ -59,3 +66,5 @@ bool operator == (const LongNumber& l, const LongNumber& r);
 bool operator != (const LongNumber& l, const LongNumber& r);
 bool operator > (const LongNumber& l, const LongNumber& r);
 bool operator < (const LongNumber& l, const LongNumber& r);
+bool operator >= (const LongNumber& l, const LongNumber& r);
+bool operator <= (const LongNumber& l, const LongNumber& r);
