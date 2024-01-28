@@ -41,8 +41,69 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
 LongNumber::LongNumber(long double num): 
     LongNumber(num, LongNumber::DEFAULT_PRECISION) {}
 
+LongNumber::LongNumber(string str, int prec): sign(), exp(), precision(prec) {
+    if (prec < 0) {
+        throw invalid_argument("Точность должна быть >= 0");
+    }
+
+    int start = 0;
+    if (str.size() > 0 && str[0] == '-') {
+        sign = true;
+        start++;
+    }
+    
+    bool intPart = true;
+    for (int i = start; i < str.size(); i++) {
+        if (prec == 0 && !intPart) {
+            break;
+        }
+        
+        char cur = str[i];
+
+        if (!isdigit(cur) && !(cur == '.' && intPart)) {
+            throw invalid_argument("В строке должно находиться корректное число");
+        }
+
+        if (cur == '.') {
+            intPart = false;
+            continue;
+        } else {
+            digits.push_back(cur - '0');
+        }
+
+        if (intPart) {
+            exp++;
+        } else {
+            prec--;
+        }
+    }
+
+    while (prec > 0) {
+        digits.push_back(0);
+        prec--;
+    }
+
+    reverseDigits();
+    removeZeros();
+}
+
+LongNumber::LongNumber(string str) {
+    size_t idx = str.find('.');
+    int prec;
+    if (idx == string::npos) {
+        prec = 0;
+    } else {
+        prec = str.size() - idx - 1;
+    }
+    *this = LongNumber(str, prec);
+}
+
 LongNumber operator ""_LN (long double num) {
     return LongNumber(num);
+}
+
+LongNumber operator ""_LN (const char* str, size_t size) {
+    return LongNumber(str);
 }
 
 

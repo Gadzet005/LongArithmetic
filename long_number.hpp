@@ -33,11 +33,11 @@ public:
     LongNumber();
     LongNumber(long double num);
     LongNumber(long double num, int prec);
+    LongNumber(string str);
+    LongNumber(string str, int prec);
 
     string toString() const;
-
     LongNumber getAbs() const;
-
     LongNumber operator - () const;
 
     LongNumber& operator += (const LongNumber& other);
@@ -54,6 +54,7 @@ public:
 };
 
 LongNumber operator ""_LN (long double num);
+LongNumber operator ""_LN (const char* str, size_t size);
 
 ostream& operator<< (ostream& out, const LongNumber num);
 
