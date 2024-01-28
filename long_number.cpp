@@ -20,6 +20,10 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
         intPart /= 10;
         exp++;
     }
+    if (digits.empty()) {
+        digits.push_back(0);
+        exp++;
+    }
 
     reverseDigits();
 
@@ -44,7 +48,7 @@ LongNumber operator ""_LN (long double num) {
 
 // Удаляет незначащие нули из целой части
 void LongNumber::removeZeros() {
-    while (exp > 0 && digits.size() > 0 && getDigit(-1) == 0) {
+    while (exp > 1 && digits.size() > 0 && getDigit(-1) == 0) {
         digits.pop_back();
         exp--;
     }
@@ -85,9 +89,6 @@ string LongNumber::toString() const {
     string result;
     if (sign) {
         result.push_back('-');
-    }
-    if (exp == 0) {
-        result.push_back('0');
     }
 
     int zeroCounter = 0;
@@ -197,7 +198,7 @@ LongNumber operator - (const LongNumber& l, const LongNumber& r) {
     }
 
     // Вычитаем из большего меньшее, если это не так, то меняем слагаемые местами со сменой знака
-    if (l > r == l.sign) {
+    if ((l.sign && l > r) || (!l.sign && l < r)) {
         return -(r - l);
     }
 
@@ -247,7 +248,7 @@ LongNumber operator * (const LongNumber& l, const LongNumber& r) {
         }
     }
 
-    result.exp = max(result.exp - result.precision, 0);
+    result.exp -= result.precision;
     result.removeZeros();
     return result;
 }
