@@ -36,8 +36,11 @@ public:
     LongNumber(const string& str);
     LongNumber(const string& str, int prec);
 
+    static LongNumber divide(const LongNumber& l, const LongNumber& r, int prec);
+
     string toString() const;
-    LongNumber getAbs() const;
+    LongNumber Abs() const;
+
     LongNumber operator - () const;
 
     LongNumber& operator += (const LongNumber& other);
@@ -45,12 +48,13 @@ public:
     LongNumber& operator *= (const LongNumber& other);
     LongNumber& operator /= (const LongNumber& other);
 
-    friend bool operator > (const LongNumber&, const LongNumber&);
-    friend bool operator == (const LongNumber&, const LongNumber&);
-    friend LongNumber operator - (const LongNumber&, const LongNumber&);
-    friend LongNumber operator + (const LongNumber&, const LongNumber&);
-    friend LongNumber operator * (const LongNumber&, const LongNumber&);
-    friend LongNumber operator / (const LongNumber&, const LongNumber&);
+    friend LongNumber operator + (const LongNumber& l, const LongNumber& r);
+    friend LongNumber operator - (const LongNumber& l, const LongNumber& r);
+    friend LongNumber operator * (const LongNumber& l, const LongNumber& r);
+    friend LongNumber operator / (const LongNumber& l, const LongNumber& r);
+
+    friend bool operator > (const LongNumber& l, const LongNumber& r);
+    friend bool operator == (const LongNumber& l, const LongNumber& r);
 };
 
 LongNumber operator ""_LN (long double num);
@@ -59,14 +63,7 @@ LongNumber operator ""_LN (const char* str, size_t size);
 ostream& operator << (ostream& out, const LongNumber& num);
 istream& operator >> (istream& in, LongNumber& num);
 
-LongNumber operator + (const LongNumber& l, const LongNumber& r);
-LongNumber operator - (const LongNumber& l, const LongNumber& r);
-LongNumber operator * (const LongNumber& l, const LongNumber& r);
-LongNumber operator / (const LongNumber& l, const LongNumber& r);
-
-bool operator == (const LongNumber& l, const LongNumber& r);
 bool operator != (const LongNumber& l, const LongNumber& r);
-bool operator > (const LongNumber& l, const LongNumber& r);
 bool operator < (const LongNumber& l, const LongNumber& r);
 bool operator >= (const LongNumber& l, const LongNumber& r);
 bool operator <= (const LongNumber& l, const LongNumber& r);

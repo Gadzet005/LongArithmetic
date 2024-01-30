@@ -1,7 +1,7 @@
 #include "long_number.hpp"
 
 
-LongNumber::LongNumber():
+LongNumber::LongNumber() :
     exp(1), sign(), digits(1, 0), precision(LongNumber::DEFAULT_PRECISION) {}
 
 LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
@@ -38,10 +38,10 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
     removeZeros();
 }
 
-LongNumber::LongNumber(long double num): 
+LongNumber::LongNumber(long double num) : 
     LongNumber(num, LongNumber::DEFAULT_PRECISION) {}
 
-LongNumber::LongNumber(const string& str, int prec): sign(), exp(), precision(prec) {
+LongNumber::LongNumber(const string& str, int prec) : sign(), exp(), precision(prec) {
     if (prec < 0) {
         throw invalid_argument("Точность должна быть >= 0");
     }
@@ -166,7 +166,7 @@ void LongNumber::changeDigit(int idx, char value) {
 }
 
 
-LongNumber LongNumber::getAbs() const {
+LongNumber LongNumber::Abs() const {
     LongNumber tmp = *this;
     tmp.sign = 0;
     return tmp;
@@ -385,7 +385,8 @@ LongNumber& LongNumber::operator *= (const LongNumber& other) {
 }
 
 
-LongNumber operator / (const LongNumber& l, const LongNumber& r) {
+// Деление с заданной точностью
+LongNumber LongNumber::divide(const LongNumber& l, const LongNumber& r, int prec) {
     if (r == 0) {
         throw runtime_error("Деление на 0");
     }
@@ -394,11 +395,11 @@ LongNumber operator / (const LongNumber& l, const LongNumber& r) {
     result.digits.clear();
     result.exp = 0;
     result.sign = l.sign != r.sign;
-    result.precision = l.precision;
+    result.precision = prec;
 
     // Считаем, что числа положительные и целые
-    LongNumber left = l.removePoint().getAbs();
-    LongNumber right = r.removePoint().getAbs();
+    LongNumber left = l.removePoint().Abs();
+    LongNumber right = r.removePoint().Abs();
 
     const LongNumber ten = LongNumber(10, 0);
 
@@ -414,14 +415,14 @@ LongNumber operator / (const LongNumber& l, const LongNumber& r) {
     }
 
     // Дробная часть частного
-    for (int i = 0; i < r.precision; i++) {
+    int precDiff = r.precision - l.precision;
+    for (int i = 0; i < prec + precDiff; i++) {
         cur *= ten;
         result.digits.push_back(LongNumber::findDivDigit(cur, right));
     }
 
     result.reverseDigits();
 
-    int precDiff = r.precision - l.precision;
     for (int i = 0; i <= -(result.exp + precDiff); i++) {
         result.digits.push_back(0);
     }
@@ -429,6 +430,12 @@ LongNumber operator / (const LongNumber& l, const LongNumber& r) {
 
     result.removeZeros();
     return result;
+}
+
+LongNumber operator / (const LongNumber& l, const LongNumber& r) {
+    int defaultPrecision = LongNumber::DEFAULT_PRECISION;
+    int maxPrecision = max(max(l.precision, r.precision), defaultPrecision);
+    return LongNumber::divide(l, r, maxPrecision);
 }
 
 LongNumber& LongNumber::operator /= (const LongNumber& other) {
