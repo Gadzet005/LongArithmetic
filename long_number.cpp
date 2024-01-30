@@ -41,7 +41,7 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
 LongNumber::LongNumber(long double num): 
     LongNumber(num, LongNumber::DEFAULT_PRECISION) {}
 
-LongNumber::LongNumber(string str, int prec): sign(), exp(), precision(prec) {
+LongNumber::LongNumber(const string& str, int prec): sign(), exp(), precision(prec) {
     if (prec < 0) {
         throw invalid_argument("Точность должна быть >= 0");
     }
@@ -87,7 +87,7 @@ LongNumber::LongNumber(string str, int prec): sign(), exp(), precision(prec) {
     removeZeros();
 }
 
-LongNumber::LongNumber(string str) {
+LongNumber::LongNumber(const string& str) {
     size_t idx = str.find('.');
     int prec;
     if (idx == string::npos) {
@@ -217,9 +217,16 @@ string LongNumber::toString() const {
     return result;
 }
 
-ostream& operator << (ostream& out, const LongNumber num) {
+ostream& operator << (ostream& out, const LongNumber& num) {
     out << num.toString();
     return out;
+}
+
+istream& operator >> (istream& in, LongNumber& num) {
+    string s;
+    in >> s;
+    num = LongNumber(s);
+    return in;
 }
 
 
@@ -256,7 +263,7 @@ bool operator == (const LongNumber& l, const LongNumber& r) {
         return false;
     }
 
-    int digitsCount = l.exp + min(l.precision, r.precision);
+    int digitsCount = l.exp + max(l.precision, r.precision);
     for (int i = 0; i < digitsCount; i++) {
         if (l.getDigit(-i - 1) != r.getDigit(-i - 1)) {
             return false;
@@ -389,9 +396,9 @@ LongNumber operator / (const LongNumber& l, const LongNumber& r) {
     result.sign = l.sign != r.sign;
     result.precision = l.precision;
 
-    // Считаем, что числа целые
-    LongNumber left = l.removePoint();
-    LongNumber right = r.removePoint();
+    // Считаем, что числа положительные и целые
+    LongNumber left = l.removePoint().getAbs();
+    LongNumber right = r.removePoint().getAbs();
 
     const LongNumber ten = LongNumber(10, 0);
 

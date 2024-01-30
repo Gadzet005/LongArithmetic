@@ -3,15 +3,27 @@
 #include "long_number.hpp"
 
 int main() {
-    LongNumber a = "213.321"_LN;
-    LongNumber b = "91.1"_LN;
+    LongNumber a, b;
+    char op;
+    cin >> a >> op >> b;
 
-    cout << a << " " << b << endl;
-
-    cout << a + b << endl;
-    cout << a - b << endl;
-    cout << a * b << endl;
-    cout << a / b << endl;
+    switch (op) {
+    case '+':
+        cout << a + b << endl;
+        break;
+    case '-':
+        cout << a - b << endl;
+        break;
+    case '*':
+        cout << a * b << endl;
+        break;
+    case '/':
+        cout << a / b << endl;
+        break;
+    default:
+        throw runtime_error("Доступные операции: + - * /");
+        break;
+    }
 
     return 0;
 }

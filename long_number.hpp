@@ -33,8 +33,8 @@ public:
     LongNumber();
     LongNumber(long double num);
     LongNumber(long double num, int prec);
-    LongNumber(string str);
-    LongNumber(string str, int prec);
+    LongNumber(const string& str);
+    LongNumber(const string& str, int prec);
 
     string toString() const;
     LongNumber getAbs() const;
@@ -56,7 +56,8 @@ public:
 LongNumber operator ""_LN (long double num);
 LongNumber operator ""_LN (const char* str, size_t size);
 
-ostream& operator<< (ostream& out, const LongNumber num);
+ostream& operator << (ostream& out, const LongNumber& num);
+istream& operator >> (istream& in, LongNumber& num);
 
 LongNumber operator + (const LongNumber& l, const LongNumber& r);
 LongNumber operator - (const LongNumber& l, const LongNumber& r);
