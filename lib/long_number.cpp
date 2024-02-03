@@ -36,7 +36,7 @@ LongNumber::LongNumber(long double num) : LongNumber(num, LongNumber::DEFAULT_PR
 
 LongNumber::LongNumber(const std::string& str, unsigned int prec) : sign(), exp(), precision(prec) {
     int start = 0;
-    if (str.size() > 0 && str[0] == '-') {
+    if (str.size() > 1 && str[0] == '-') {
         sign = true;
         start++;
     }
@@ -65,6 +65,9 @@ LongNumber::LongNumber(const std::string& str, unsigned int prec) : sign(), exp(
             exp++;
         } else {
             precCounter++;
+            if (precCounter == prec) {
+                break;
+            }
         }
     }
 
@@ -85,6 +88,22 @@ LongNumber::LongNumber(const std::string& str) {
         prec = str.size() - idx - 1;
     }
     *this = LongNumber(str, prec);
+}
+
+LongNumber::LongNumber(const LongNumber& num, unsigned int prec) : 
+    exp(num.exp), sign(num.sign), precision(prec) 
+{
+    if (prec > num.precision) {
+        digits.push_back(0);
+    }
+
+    int start = 0;
+    if (num.precision > prec) {
+        start = num.precision - prec;
+    }
+    for (int i = start; i < num.digits.size(); i++) {
+        digits.push_back(num.digits[i]);
+    }
 }
 
 LongNumber operator ""_LN (long double num) {
@@ -130,6 +149,13 @@ int LongNumber::findDivDigit(LongNumber& num1, const LongNumber& num2) {
     return n;
 }
 
+void LongNumber::pushZerosToStr(std::string& str, int& count) const {
+    for (int j = 0; j < count; j++) {
+        str.push_back('0');
+    }
+    count = 0;
+}
+
 
 int LongNumber::getDigit(int idx) const {
     if (idx < 0 && idx >= -digits.size()) {
@@ -173,10 +199,7 @@ std::string LongNumber::toString() const {
     for (int i = 0; i < digits.size(); i++) {
         // Разделяем целую и дробную часть
         if (i == exp) {
-            for (int j = 0; j < zeroCounter; j++) {
-                result.push_back('0');
-            }
-            zeroCounter = 0;
+            pushZerosToStr(result, zeroCounter);
             haveDigitAfterPoint = false;
             result.push_back('.');
         }
@@ -185,10 +208,7 @@ std::string LongNumber::toString() const {
         if (curDigit == 0) {
             zeroCounter++;
         } else {
-            for (int j = 0; j < zeroCounter; j++) {
-                result.push_back('0');
-            }
-            zeroCounter = 0;
+            pushZerosToStr(result, zeroCounter);
             haveDigitAfterPoint = true;
             result.push_back('0' + curDigit);
         }
@@ -198,9 +218,7 @@ std::string LongNumber::toString() const {
         result.push_back('0');
     }
     if (precision == 0) {
-        for (int j = 0; j < zeroCounter; j++) {
-            result.push_back('0');
-        }
+        pushZerosToStr(result, zeroCounter);
     }
 
     return result;
@@ -357,7 +375,7 @@ LongNumber& LongNumber::operator *= (const LongNumber& other) {
 // Деление с заданной точностью
 LongNumber LongNumber::divide(const LongNumber& left, const LongNumber& right, int prec) {
     if (right == LongNumber(0, 0)) {
-        throw std::runtime_error("Деление на 0");
+        throw divisionByZero();
     }
 
     LongNumber result(0, 0);

@@ -4,7 +4,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include <stdexcept>
+
+#include "exceptions.hpp"
 
 
 class LongNumber {
@@ -20,6 +21,7 @@ private:
     void removeZeros();
     void reverseDigits();
     LongNumber removePoint() const;
+    void pushZerosToStr(std::string& str, int& count) const;
 
     static int findDivDigit(LongNumber& num1, const LongNumber& num2);
     
@@ -33,6 +35,7 @@ public:
     explicit LongNumber(long double num, unsigned int prec);
     explicit LongNumber(const std::string& str);
     explicit LongNumber(const std::string& str, unsigned int prec);
+    explicit LongNumber(const LongNumber& num, unsigned int prec);
 
     static LongNumber divide(const LongNumber& left, const LongNumber& right, int prec);
 
