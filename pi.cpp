@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "lib/utils.hpp"
+#include "src/utils.hpp"
 
 int main() {
     using std::cout, std::endl;
