@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "src/utils.hpp"
+#include "utils.hpp"
 
 int main() {
     using namespace std;

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "src/long_number.hpp"
+#include "long_number.hpp"
 
 int main() {
     using std::cin, std::cout, std::endl;
