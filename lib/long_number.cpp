@@ -4,18 +4,14 @@
 LongNumber::LongNumber() :
     exp(1), sign(), digits(1, 0), precision(LongNumber::DEFAULT_PRECISION) {}
 
-LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
-    if (prec < 0) {
-        throw invalid_argument("Точность должна быть >= 0");
-    }
-
+LongNumber::LongNumber(long double num, unsigned int prec): exp(), precision(prec) {
     sign = num < 0;
-    num = abs(num);
+    num = std::abs(num);
 
     long double intPart;
-    num = modf(num, &intPart);
+    num = std::modf(num, &intPart);
     while (intPart >= 1) {
-        long double mod = fmod(intPart, 10);
+        long double mod = std::fmod(intPart, 10);
         digits.push_back(mod);
         intPart /= 10;
         exp++;
@@ -27,25 +23,18 @@ LongNumber::LongNumber(long double num, int prec): exp(), precision(prec) {
 
     reverseDigits();
 
-    while (prec > 0) {
-        num *= 10;
-        num = modf(num, &intPart);
+    for (int i = 0; i < prec; i++) {
+        num = std::modf(num * 10, &intPart);
         digits.push_back(intPart);
-        prec--;
     }
 
     reverseDigits();
     removeZeros();
 }
 
-LongNumber::LongNumber(long double num) : 
-    LongNumber(num, LongNumber::DEFAULT_PRECISION) {}
+LongNumber::LongNumber(long double num) : LongNumber(num, LongNumber::DEFAULT_PRECISION) {}
 
-LongNumber::LongNumber(const string& str, int prec) : sign(), exp(), precision(prec) {
-    if (prec < 0) {
-        throw invalid_argument("Точность должна быть >= 0");
-    }
-
+LongNumber::LongNumber(const std::string& str, unsigned int prec) : sign(), exp(), precision(prec) {
     int start = 0;
     if (str.size() > 0 && str[0] == '-') {
         sign = true;
@@ -53,6 +42,7 @@ LongNumber::LongNumber(const string& str, int prec) : sign(), exp(), precision(p
     }
     
     bool intPart = true;
+    unsigned int precCounter = 0;
     for (int i = start; i < str.size(); i++) {
         if (prec == 0 && !intPart) {
             break;
@@ -61,7 +51,7 @@ LongNumber::LongNumber(const string& str, int prec) : sign(), exp(), precision(p
         char cur = str[i];
 
         if (!isdigit(cur) && !(cur == '.' && intPart)) {
-            throw invalid_argument("В строке должно находиться корректное число");
+            throw std::invalid_argument("В строке должно находиться корректное число");
         }
 
         if (cur == '.') {
@@ -74,23 +64,22 @@ LongNumber::LongNumber(const string& str, int prec) : sign(), exp(), precision(p
         if (intPart) {
             exp++;
         } else {
-            prec--;
+            precCounter++;
         }
     }
 
-    while (prec > 0) {
+    for (; precCounter < prec; precCounter++) {
         digits.push_back(0);
-        prec--;
     }
 
     reverseDigits();
     removeZeros();
 }
 
-LongNumber::LongNumber(const string& str) {
+LongNumber::LongNumber(const std::string& str) {
     size_t idx = str.find('.');
     int prec;
-    if (idx == string::npos) {
+    if (idx == std::string::npos) {
         prec = 0;
     } else {
         prec = str.size() - idx - 1;
@@ -118,7 +107,7 @@ void LongNumber::removeZeros() {
 // Меняет порядок разрядов на противоположный
 void LongNumber::reverseDigits() {
     for (int i = 0; i < digits.size() / 2; i++) {
-        swap(digits[i], digits[digits.size() - i - 1]);
+        std::swap(digits[i], digits[digits.size() - i - 1]);
     }
 }
 
@@ -166,15 +155,15 @@ void LongNumber::changeDigit(int idx, char value) {
 }
 
 
-LongNumber LongNumber::Abs() const {
+LongNumber LongNumber::abs() const {
     LongNumber tmp = *this;
     tmp.sign = 0;
     return tmp;
 }
 
 
-string LongNumber::toString() const {
-    string result;
+std::string LongNumber::toString() const {
+    std::string result;
     if (sign) {
         result.push_back('-');
     }
@@ -217,86 +206,66 @@ string LongNumber::toString() const {
     return result;
 }
 
-ostream& operator << (ostream& out, const LongNumber& num) {
+std::ostream& operator << (std::ostream& out, const LongNumber& num) {
     out << num.toString();
     return out;
 }
 
-istream& operator >> (istream& in, LongNumber& num) {
-    string s;
+std::istream& operator >> (std::istream& in, LongNumber& num) {
+    std::string s;
     in >> s;
     num = LongNumber(s);
     return in;
 }
 
 
-bool operator > (const LongNumber& l, const LongNumber& r) {
-    if (l.sign != r.sign) {
-        return l.sign < r.sign;
-    }
-    if (l.sign == r.sign && l.sign) {
-        return (-r > -l);
-    }
-    if (l.exp != r.exp) {
-        return l.exp > r.exp;
+std::strong_ordering LongNumber::operator <=> (const LongNumber& right) const {
+    const std::strong_ordering less = std::strong_ordering::less;
+    const std::strong_ordering greater = std::strong_ordering::greater;
+    const LongNumber& left = *this;
+
+    if (left.sign != right.sign) {
+        return left.sign ? less : greater;
     }
 
-    int digitsCount = l.exp + max(l.precision, r.precision);
+    if (left.sign == right.sign && left.sign) {
+        return (-right <=> -left);
+    }
+
+    if (left.exp != right.exp) {
+        return left.exp < right.exp ? less : greater;
+    }
+
+    int digitsCount = left.exp + std::max(left.precision, right.precision);
     for (int i = 0; i < digitsCount; i++) {
-        int ld = l.getDigit(-i - 1);
-        int rd = r.getDigit(-i - 1);
+        int leftDight = left.getDigit(-i - 1);
+        int rightDigit = right.getDigit(-i - 1);
         
-        if (ld != rd) {
-            return ld > rd;
+        if (leftDight != rightDigit) {
+            return leftDight < rightDigit ? less : greater;
         }
     }
 
-    return false;
+    return std::strong_ordering::equal;
 }
 
-bool operator < (const LongNumber& l, const LongNumber& r) {
-    return r > l;
-}
-
-bool operator == (const LongNumber& l, const LongNumber& r) {
-    if (l.sign != r.sign || l.exp != r.exp) {
-        return false;
-    }
-
-    int digitsCount = l.exp + max(l.precision, r.precision);
-    for (int i = 0; i < digitsCount; i++) {
-        if (l.getDigit(-i - 1) != r.getDigit(-i - 1)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool operator != (const LongNumber& l, const LongNumber& r) {
-    return !(l == r);
-}
-
-bool operator >= (const LongNumber& l, const LongNumber& r) {
-    return (l > r) || (l == r);
-}
-
-bool operator <= (const LongNumber& l, const LongNumber& r) {
-    return r >= l;
+bool LongNumber::operator == (const LongNumber& right) const {
+    return ((*this) <=> right) == std::strong_ordering::equal;
 }
 
 
-LongNumber operator + (const LongNumber& l, const LongNumber& r) {
+LongNumber operator + (const LongNumber& left, const LongNumber& right) {
     // Если разные знаки, сводим сложение к вычитанию
-    if (l.sign != r.sign) {
-        return l - (-r);
+    if (left.sign != right.sign) {
+        return left - (-right);
     }
 
     // Выбираем число с наибольшей точностью
-    LongNumber result = l.precision > r.precision ? l : r;
-    const LongNumber& other = l.precision > r.precision ? r : l;
+    LongNumber result = left.precision > right.precision ? left : right;
+    const LongNumber& other = left.precision > right.precision ? right : left;
     
-    int offset = abs(l.precision - r.precision);
-    int digitsCount = min(l.precision, r.precision) + max(l.exp, r.exp);
+    int offset = abs(left.precision - right.precision);
+    int digitsCount = std::min(left.precision, right.precision) + std::max(left.exp, right.exp);
     for (int i = 0; i < digitsCount; i++) {
         int sum = result.getDigit(offset + i) + other.getDigit(i);
         // Текущий разряд
@@ -317,24 +286,24 @@ LongNumber& LongNumber::operator += (const LongNumber& other) {
 }
 
 
-LongNumber operator - (const LongNumber& l, const LongNumber& r) {
+LongNumber operator - (const LongNumber& left, const LongNumber& right) {
     // Если разные знаки, сводим вычитание к сложению
-    if (l.sign != r.sign) {
-        return l + (-r);
+    if (left.sign != right.sign) {
+        return left + (-right);
     }
 
     // Вычитаем из большего меньшее, если это не так, то меняем слагаемые местами со сменой знака
-    if ((l.sign && l > r) || (!l.sign && l < r)) {
-        return -(r - l);
+    if ((left.sign && left > right) || (!left.sign && left < right)) {
+        return -(right - left);
     }
 
     // Результат будет иметь наибольшую точность
-    LongNumber result = LongNumber(0, max(l.precision, r.precision)) + l;
+    LongNumber result = LongNumber(0, std::max(left.precision, right.precision)) + left;
 
-    int offset = result.precision - r.precision;
-    int digitsCount = min(result.precision, r.precision) + max(result.exp, r.exp);
+    int offset = result.precision - right.precision;
+    int digitsCount = std::min(result.precision, right.precision) + std::max(result.exp, right.exp);
     for (int i = 0; i < digitsCount; i++) {
-        int sm = result.getDigit(offset + i) - r.getDigit(i);
+        int sm = result.getDigit(offset + i) - right.getDigit(i);
         if (sm < 0) {
             result.setDigit(offset + i, sm + 10);
             result.changeDigit(offset + i + 1, -1);
@@ -359,14 +328,14 @@ LongNumber LongNumber::operator - () const {
 }
 
 
-LongNumber operator * (const LongNumber& l, const LongNumber& r) {
+LongNumber operator * (const LongNumber& left, const LongNumber& right) {
     LongNumber result;
-    result.precision = r.precision + l.precision;
-    result.sign = l.sign != r.sign;
+    result.precision = right.precision + left.precision;
+    result.sign = left.sign != right.sign;
 
-    for (int i = 0; i < l.digits.size(); i++) {
-        for (int j = 0; j < r.digits.size(); j++) {
-            int change = result.getDigit(i + j) + l.digits[i] * r.digits[j];
+    for (int i = 0; i < left.digits.size(); i++) {
+        for (int j = 0; j < right.digits.size(); j++) {
+            int change = result.getDigit(i + j) + left.digits[i] * right.digits[j];
             result.setDigit(i + j, change % 10);
             if (change >= 10) {
                 result.changeDigit(i + j + 1, change / 10);
@@ -386,39 +355,39 @@ LongNumber& LongNumber::operator *= (const LongNumber& other) {
 
 
 // Деление с заданной точностью
-LongNumber LongNumber::divide(const LongNumber& l, const LongNumber& r, int prec) {
-    if (r == 0) {
-        throw runtime_error("Деление на 0");
+LongNumber LongNumber::divide(const LongNumber& left, const LongNumber& right, int prec) {
+    if (right == LongNumber(0, 0)) {
+        throw std::runtime_error("Деление на 0");
     }
 
     LongNumber result(0, 0);
     result.digits.clear();
     result.exp = 0;
-    result.sign = l.sign != r.sign;
+    result.sign = left.sign != right.sign;
     result.precision = prec;
 
     // Считаем, что числа положительные и целые
-    LongNumber left = l.removePoint().Abs();
-    LongNumber right = r.removePoint().Abs();
+    LongNumber leftAbs = left.removePoint().abs();
+    LongNumber rightAbs = right.removePoint().abs();
 
     const LongNumber ten = LongNumber(10, 0);
 
     // Целая часть частного
     int digitIdx = 0;
     LongNumber cur(0, 0);
-    while (digitIdx < left.exp) {
-        LongNumber curDigit = LongNumber(left.getDigit(-digitIdx - 1), 0);
+    while (digitIdx < leftAbs.exp) {
+        LongNumber curDigit = LongNumber(leftAbs.getDigit(-digitIdx - 1), 0);
         cur = ten * cur + curDigit;
-        result.digits.push_back(LongNumber::findDivDigit(cur, right));
+        result.digits.push_back(LongNumber::findDivDigit(cur, rightAbs));
         result.exp++;
         digitIdx++;
     }
 
     // Дробная часть частного
-    int precDiff = r.precision - l.precision;
+    int precDiff = right.precision - left.precision;
     for (int i = 0; i < prec + precDiff; i++) {
         cur *= ten;
-        result.digits.push_back(LongNumber::findDivDigit(cur, right));
+        result.digits.push_back(LongNumber::findDivDigit(cur, rightAbs));
     }
 
     result.reverseDigits();
@@ -426,20 +395,19 @@ LongNumber LongNumber::divide(const LongNumber& l, const LongNumber& r, int prec
     for (int i = 0; i <= -(result.exp + precDiff); i++) {
         result.digits.push_back(0);
     }
-    result.exp = max(result.exp + precDiff, 1);
+    result.exp = std::max(result.exp + precDiff, 1);
 
     result.removeZeros();
     return result;
 }
 
-LongNumber operator / (const LongNumber& l, const LongNumber& r) {
-    int defaultPrecision = LongNumber::DEFAULT_PRECISION;
-    int maxPrecision = max(max(l.precision, r.precision), defaultPrecision);
-    return LongNumber::divide(l, r, maxPrecision);
+LongNumber operator / (const LongNumber& left, const LongNumber& right) {
+    unsigned int defaultPrecision = LongNumber::DEFAULT_PRECISION;
+    int maxPrecision = std::max(std::max(left.precision, right.precision), defaultPrecision);
+    return LongNumber::divide(left, right, maxPrecision);
 }
 
 LongNumber& LongNumber::operator /= (const LongNumber& other) {
     *this = *this / other;
     return *this;
 }
-

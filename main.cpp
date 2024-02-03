@@ -1,8 +1,10 @@
 #include <iostream>
 
-#include "long_number.hpp"
+#include "lib/long_number.hpp"
 
 int main() {
+    using std::cin, std::cout, std::endl;
+
     while (true) {
         LongNumber a, b;
         char op;
@@ -22,7 +24,7 @@ int main() {
             cout << a / b << endl;
             break;
         default:
-            throw runtime_error("Доступные операции: + - * /");
+            throw std::runtime_error("Доступные операции: + - * /");
             break;
         }
     }
