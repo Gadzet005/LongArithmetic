@@ -156,6 +156,15 @@ void LongNumber::pushZerosToStr(std::string& str, int& count) const {
     count = 0;
 }
 
+bool LongNumber::isZero() const {
+    for (char digit : digits) {
+        if (digit != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 int LongNumber::getDigit(int idx) const {
     if (idx < 0 && idx >= -digits.size()) {
@@ -185,6 +194,10 @@ LongNumber LongNumber::abs() const {
     LongNumber tmp = *this;
     tmp.sign = 0;
     return tmp;
+}
+
+unsigned int LongNumber::getPrecision() const {
+    return precision;
 }
 
 
@@ -242,7 +255,7 @@ std::strong_ordering LongNumber::operator <=> (const LongNumber& right) const {
     const std::strong_ordering greater = std::strong_ordering::greater;
     const LongNumber& left = *this;
 
-    if (left.sign != right.sign) {
+    if (left.sign != right.sign && !left.isZero()) {
         return left.sign ? less : greater;
     }
 
@@ -374,7 +387,7 @@ LongNumber& LongNumber::operator *= (const LongNumber& other) {
 
 // Деление с заданной точностью
 LongNumber LongNumber::divide(const LongNumber& left, const LongNumber& right, int prec) {
-    if (right == LongNumber(0, 0)) {
+    if (right.isZero()) {
         throw divisionByZero();
     }
 

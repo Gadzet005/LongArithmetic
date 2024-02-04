@@ -22,6 +22,7 @@ private:
     void reverseDigits();
     LongNumber removePoint() const;
     void pushZerosToStr(std::string& str, int& count) const;
+    bool isZero() const;
 
     static int findDivDigit(LongNumber& num1, const LongNumber& num2);
     
@@ -41,6 +42,7 @@ public:
 
     std::string toString() const;
     LongNumber abs() const;
+    unsigned int getPrecision() const;
 
     std::strong_ordering operator <=> (const LongNumber& right) const;
     bool operator == (const LongNumber& right) const;
