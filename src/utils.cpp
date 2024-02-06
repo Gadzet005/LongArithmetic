@@ -6,11 +6,9 @@ LongNumber arccot(int value, unsigned int prec=LongNumber::DEFAULT_PRECISION) {
     LongNumber cur = LongNumber::divide(LongNumber(1, 0), LongNumber(value, 0), prec);
     LongNumber sum(0, prec);
 
-    int i = 0;
-    while (cur != LongNumber(0, 0)) {
+    for (int i = 0; !cur.isZero(); i++) {
         sum += cur / LongNumber(2 * i + 1, 0);
-        cur = -cur / curChange;
-        i++;
+        cur = std::move(-cur / curChange);
     }
 
     return sum;

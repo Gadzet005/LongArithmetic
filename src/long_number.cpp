@@ -312,7 +312,7 @@ LongNumber operator + (const LongNumber& left, const LongNumber& right) {
 }
 
 LongNumber& LongNumber::operator += (const LongNumber& other) {
-    *this = *this + other;
+    *this = std::move(*this + other);
     return *this;
 }
 
@@ -348,7 +348,7 @@ LongNumber operator - (const LongNumber& left, const LongNumber& right) {
 }
 
 LongNumber& LongNumber::operator -= (const LongNumber& other) {
-    *this = *this - other;
+    *this = std::move(*this - other);
     return *this;
 }
 
@@ -380,7 +380,7 @@ LongNumber operator * (const LongNumber& left, const LongNumber& right) {
 }
 
 LongNumber& LongNumber::operator *= (const LongNumber& other) {
-    *this = *this * other;
+    *this = std::move(*this * other);
     return *this;
 }
 
@@ -439,6 +439,6 @@ LongNumber operator / (const LongNumber& left, const LongNumber& right) {
 }
 
 LongNumber& LongNumber::operator /= (const LongNumber& other) {
-    *this = *this / other;
+    *this = std::move(*this / other);
     return *this;
 }
