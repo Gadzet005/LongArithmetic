@@ -9,6 +9,8 @@ TEST(Number, add) {
     const vector<TestCase> cases = {
         {"999", "1", "1000"},
         {"1.0", "-1", "0"},
+        {"0.000001", "0.01", "0.010001"},
+        {"0.0", "0.00", "0"},
         {"-990.0000", "-10.00", "-1000.0"},
         {"-11.32", "11.0", "-0.32"},
         {"1.98", "9.0227", "11.0027"},
@@ -23,7 +25,8 @@ TEST(Number, add) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) + LongNumber(s2), LongNumber(s3));
+        EXPECT_EQ(LongNumber(s1) + LongNumber(s2), LongNumber(s3))
+        << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
 
@@ -32,6 +35,9 @@ TEST(Number, sub) {
     const vector<TestCase> cases = {
         {"1000", "1", "999"},
         {"1", "-1", "2"},
+        {"0", "0", "0.0"},
+        {"0.001", "0.01", "-0.009"},
+        {"0.01", "0.0001", "0.0099"},
         {"-990.0000", "10.0", "-1000"},
         {"15", "13.001", "1.999"},
         {"-5.689", "1.011", "-6.7"},
@@ -45,7 +51,8 @@ TEST(Number, sub) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) - LongNumber(s2), LongNumber(s3));
+        EXPECT_EQ(LongNumber(s1) - LongNumber(s2), LongNumber(s3))
+        << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
 
@@ -60,8 +67,9 @@ TEST(Number, mult) {
         {"-0.005", "-5000", "25"},
         {"21399.04", "0.0000", "0"},
         {"-8237.123523", "1", "-8237.123523"},
-        {"0.0", "0", "0.00"},
+        {"0.0", "-0", "0.00"},
         {"1", "1", "1.0"},
+        {"1", "9934201.231", "9934201.2310"},
         {"98249.1212", "1.2133246432", "119208.07992470355584"},
         {
             "8123129923942392304112389128989.123828948910211293120938",
@@ -71,7 +79,8 @@ TEST(Number, mult) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) * LongNumber(s2), LongNumber(s3));
+        EXPECT_EQ(LongNumber(s1) * LongNumber(s2), LongNumber(s3))
+        << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
 
@@ -99,7 +108,7 @@ TEST(Number, div) {
         EXPECT_EQ(
             LongNumber::divide(LongNumber(s1), LongNumber(s2), divPrec), 
             LongNumber(s3, divPrec)
-        );
+        ) << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 
     EXPECT_THROW(LongNumber(1) / LongNumber(0), divisionByZero);
@@ -123,6 +132,7 @@ TEST(Number, toString) {
         {"123", "123"},
         {"-123.2131200000000", "-123.21312"},
         {"0", "0"},
+        {"0.0000", "0.0"},
         {"-0.000010", "-0.00001"},
         {"-000214.213000", "-214.213"},
         {"10000.0000", "10000.0"},
@@ -130,7 +140,8 @@ TEST(Number, toString) {
     };
 
     for (auto [s1, s2] : cases) {
-        EXPECT_EQ(LongNumber(s1).toString(), s2);
+        EXPECT_EQ(LongNumber(s1).toString(), s2) 
+        << "Входные данные: " << s1 << ", " << s2;
     }
 }
 
