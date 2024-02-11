@@ -11,9 +11,11 @@
 class LongNumber {
 public:
     static const unsigned int DEFAULT_PRECISION = 10;
+    static const unsigned long long BASE = 1e9;
+    static const unsigned int LBASE = 9;
 
 private:
-    std::vector<char> digits;
+    std::vector<long long> digits;
     int exp;
     unsigned int precision;
     bool sign;
@@ -21,13 +23,15 @@ private:
     void removeZeros();
     void reverseDigits();
     LongNumber removePoint() const;
-    void pushZerosToStr(std::string& str, int& count) const;
+    void pushZerosToStr(std::string& str, int count) const;
+    void addToDigit(long long& digit, char c) const;
+    void pushDigit(long long& digit, int& digitCounter);
 
-    static int findDivDigit(LongNumber& num1, const LongNumber& num2);
+    static long long findDivDigit(LongNumber& num1, const LongNumber& num2);
     
-    int getDigit(int idx) const;
-    void setDigit(int idx, char value);
-    void changeDigit(int idx, char value);
+    long long getDigit(int idx) const;
+    void setDigit(int idx, long long value);
+    void changeDigit(int idx, long long value);
 
 public:
     LongNumber();
@@ -42,6 +46,7 @@ public:
     std::string toString() const;
     LongNumber abs() const;
     unsigned int getPrecision() const;
+    unsigned int digitsAfterPoint() const;
     bool isZero() const;
 
     std::strong_ordering operator <=> (const LongNumber& right) const;
