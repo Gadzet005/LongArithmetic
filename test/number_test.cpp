@@ -143,6 +143,8 @@ TEST(Number, toString) {
         EXPECT_EQ(LongNumber(s1).toString(), s2) 
         << "Входные данные: " << s1 << ", " << s2;
     }
+
+    EXPECT_EQ(LongNumber().toString(), "0");
 }
 
 TEST(Number, other) {
@@ -150,4 +152,6 @@ TEST(Number, other) {
     EXPECT_THROW(LongNumber("1123.213.213"), std::invalid_argument);
     EXPECT_THROW(LongNumber("-1123.213213@"), std::invalid_argument);
     EXPECT_THROW(LongNumber("-"), std::invalid_argument);
+
+    EXPECT_EQ(LongNumber(), LongNumber("0"));
 }

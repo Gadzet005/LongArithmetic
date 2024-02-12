@@ -115,7 +115,7 @@ LongNumber operator ""_LN (const char* str, size_t size) {
 
 // Удаляет незначащие нули из целой части
 void LongNumber::removeZeros() {
-    while (digits.size() > 1 && getDigit(-1) == 0) {
+    while (digits.size() > 1 && digits.back() == 0) {
         digits.pop_back();
         exp--;
     }
