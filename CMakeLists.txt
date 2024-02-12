@@ -17,7 +17,7 @@ file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_executable(Calculator exe/calculator.cpp)
 add_executable(Pi exe/pi.cpp)
 
-# Покрытие тестами
+# Покрытие тестов
 if(ENABLE_COVERAGE)
   find_program(LCOV lcov REQUIRED)
   set(CMAKE_CXX_FLAGS "-O0 -coverage")
