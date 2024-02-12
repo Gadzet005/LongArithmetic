@@ -50,7 +50,7 @@ LongNumber::LongNumber(const std::string& str, unsigned int prec) : sign(), exp(
         
         char cur = str[i];
 
-        if (!isdigit(cur) && !(cur == '.' && intPart)) {
+        if (!isdigit(cur) && !(cur == '.' && intPart && i != start)) {
             throw std::invalid_argument("В строке должно находиться корректное число");
         }
 
@@ -198,45 +198,46 @@ unsigned int LongNumber::getPrecision() const {
 
 
 std::string LongNumber::toString() const {
-    std::string result;
+   std::string result;
     if (sign) {
         result.push_back('-');
     }
 
-    int zeroCounter = 0;
-    bool haveDigitAfterPoint = true;
+    // Целая часть
+
     if (exp <= 0) {
         result.push_back('0');
     }
-    if (exp < 0) {
-        result.push_back('.');
-        zeroCounter = -exp;
-        haveDigitAfterPoint = false;
+
+    for (int i = 0; i < exp; i++) {
+        char cur = getDigit(-i - 1);
+        result.push_back(cur + '0');
     }
 
-    for (int i = 0; i < digits.size(); i++) {
-        // Разделяем целую и дробную часть
-        if (i == exp) {
-            pushZerosToStr(result, zeroCounter);
-            haveDigitAfterPoint = false;
-            result.push_back('.');
-        }
-    
-        char curDigit = getDigit(-i - 1);
-        if (curDigit == 0) {
+    // Дробная часть
+
+    if (precision == 0) {
+        return result;
+    }
+
+    result.push_back('.');
+    int zeroCounter = std::max(-exp, 0);
+    bool isEmpty = true;
+
+    for (int i = std::max(0, exp); i < digits.size(); i++) {
+        char cur = getDigit(-i - 1);
+        if (cur == 0) {
             zeroCounter++;
         } else {
             pushZerosToStr(result, zeroCounter);
-            haveDigitAfterPoint = true;
-            result.push_back('0' + curDigit);
+            zeroCounter = 0;
+            result.push_back(cur + '0');
+            isEmpty = false;
         }
     }
 
-    if (!haveDigitAfterPoint) {
+    if (isEmpty) {
         result.push_back('0');
-    }
-    if (precision == 0) {
-        pushZerosToStr(result, zeroCounter);
     }
 
     return result;
