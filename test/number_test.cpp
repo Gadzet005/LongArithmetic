@@ -25,7 +25,7 @@ TEST(Number, add) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) + LongNumber(s2), LongNumber(s3))
+        EXPECT_EQ(LongNumber(s1) += LongNumber(s2), LongNumber(s3))
         << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
@@ -51,7 +51,7 @@ TEST(Number, sub) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) - LongNumber(s2), LongNumber(s3))
+        EXPECT_EQ(LongNumber(s1) -= LongNumber(s2), LongNumber(s3))
         << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
@@ -79,7 +79,7 @@ TEST(Number, mult) {
     };
 
     for (auto [s1, s2, s3] : cases) {
-        EXPECT_EQ(LongNumber(s1) * LongNumber(s2), LongNumber(s3))
+        EXPECT_EQ(LongNumber(s1) *= LongNumber(s2), LongNumber(s3))
         << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 }
@@ -108,7 +108,12 @@ TEST(Number, div) {
         EXPECT_EQ(
             LongNumber::divide(LongNumber(s1), LongNumber(s2), divPrec), 
             LongNumber(s3, divPrec)
-        ) << "Входные данные: " << s1 << ", " << s2 << ", " << s3;
+        ) << "[divide] Входные данные: " << s1 << ", " << s2 << ", " << s3;
+
+        EXPECT_EQ(
+            LongNumber(LongNumber(s1) /= LongNumber(s2), divPrec),
+            LongNumber(s3, divPrec)
+        ) << "[/=] Входные данные: " << s1 << ", " << s2 << ", " << s3;
     }
 
     EXPECT_THROW(LongNumber(1) / LongNumber(0), divisionByZero);
@@ -155,4 +160,10 @@ TEST(Number, other) {
     EXPECT_THROW(LongNumber(".123"), std::invalid_argument);
 
     EXPECT_EQ(LongNumber(), LongNumber("0"));
+    EXPECT_EQ(2324902394.5_LN, LongNumber(2324902394.5));
+    EXPECT_EQ("-21983809213812089.2349894305909123"_LN, LongNumber("-21983809213812089.2349894305909123"));
+
+    LongNumber n("-2938320123.213213");
+    EXPECT_EQ(n.abs(), -n);
+    EXPECT_EQ((-n).abs(), -n);
 }

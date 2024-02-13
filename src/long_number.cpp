@@ -154,7 +154,7 @@ void LongNumber::pushZerosToStr(std::string& str, int& count) const {
 }
 
 bool LongNumber::isZero() const {
-    return digits.size() == 1 && digits[0] == 0;
+    return (digits.size() == 1 && digits[0] == 0) || digits.size() == 0;
 }
 
 
