@@ -8,6 +8,8 @@
 #include "exceptions.hpp"
 
 
+namespace lngAr {
+
 class LongNumber {
 public:
     static const unsigned int DEFAULT_PRECISION = 10;
@@ -65,3 +67,5 @@ LongNumber operator ""_LN (const char* str, size_t size);
 
 std::ostream& operator << (std::ostream& out, const LongNumber& num);
 std::istream& operator >> (std::istream& in, LongNumber& num);
+
+}

@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+namespace lngAr {
+
 LongNumber arccot(long long value, unsigned int prec=LongNumber::DEFAULT_PRECISION) {
     LongNumber curChange(value * value, 0);
     LongNumber cur = LongNumber::divide(LongNumber(1, 0), LongNumber(value, 0), prec);
@@ -19,4 +21,6 @@ LongNumber calculatePi(unsigned int prec=LongNumber::DEFAULT_PRECISION) {
         LongNumber(4, 0) * arccot(5, highPrec) - arccot(239, highPrec)
     ) * LongNumber(4, 0);
     return LongNumber(pi, prec);
+}
+
 }

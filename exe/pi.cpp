@@ -6,6 +6,7 @@
 
 int main() {
     using namespace std;
+    using namespace lngAr;
 
     unsigned int prec;
     cout << "Введите точность: " << endl;

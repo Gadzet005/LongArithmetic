@@ -3,7 +3,8 @@
 #include "long_number.hpp"
 
 int main() {
-    using std::cin, std::cout, std::endl;
+    using namespace std;
+    using namespace lngAr;
 
     while (true) {
         LongNumber a, b;

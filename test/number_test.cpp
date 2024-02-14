@@ -3,6 +3,7 @@
 #include "long_number.hpp"
 
 using std::vector, std::tuple, std::string;
+using namespace lngAr;
 
 TEST(Number, add) {
     using TestCase = tuple<string, string, string>;

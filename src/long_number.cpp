@@ -1,6 +1,8 @@
 #include "long_number.hpp"
 
 
+namespace lngAr {
+
 LongNumber::LongNumber() :
     exp(1), sign(), digits(1, 0), precision(LongNumber::DEFAULT_PRECISION) {}
 
@@ -443,4 +445,6 @@ LongNumber operator / (const LongNumber& left, const LongNumber& right) {
 LongNumber& LongNumber::operator /= (const LongNumber& other) {
     *this = std::move(*this / other);
     return *this;
+}
+
 }

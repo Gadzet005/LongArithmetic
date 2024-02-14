@@ -3,6 +3,7 @@
 #include <array>
 #include "utils.hpp"
 
+using namespace lngAr;
 
 TEST(Pi, calc) {
     std::ifstream piFile("data/pi.txt");
