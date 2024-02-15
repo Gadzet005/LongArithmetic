@@ -159,6 +159,12 @@ bool LongNumber::isZero() const {
     return (digits.size() == 1 && digits[0] == 0) || digits.size() == 0;
 }
 
+void LongNumber::shiftLeft(char val) {
+    digits.insert(digits.begin(), val);
+    exp++;
+    removeZeros();
+}
+
 
 int LongNumber::getDigit(int idx) const {
     if (idx < 0 && idx >= -digits.size()) {
@@ -403,20 +409,17 @@ LongNumber LongNumber::divide(const LongNumber& left, const LongNumber& right, i
         throw divisionByZero();
     }
 
-    LongNumber result("0", 0);
+    LongNumber result(0, 0);
     result.sign = left.sign != right.sign;
 
     // Считаем, что числа положительные и целые
     LongNumber leftAbs = left.removePoint().abs();
     LongNumber rightAbs = right.removePoint().abs();
 
-    const LongNumber ten = LongNumber("10", 0);
-
     // Целая часть частного
-    LongNumber cur("0", 0);
+    LongNumber cur(0, 0);
     for (int digitIdx = 0; digitIdx < leftAbs.exp; digitIdx++) {
-        LongNumber curDigit = LongNumber(leftAbs.getDigit(-digitIdx - 1), 0);
-        cur = ten * cur + curDigit;
+        cur.shiftLeft(leftAbs.getDigit(-digitIdx - 1));
         result.digits.push_back(LongNumber::findDivDigit(cur, rightAbs));
         result.exp++;
     }
@@ -424,7 +427,7 @@ LongNumber LongNumber::divide(const LongNumber& left, const LongNumber& right, i
     // Дробная часть частного
     int precDiff = right.precision - left.precision;
     for (int i = 0; i < prec + precDiff; i++) {
-        cur *= ten;
+        cur.shiftLeft(0);
         result.digits.push_back(LongNumber::findDivDigit(cur, rightAbs));
     }
 

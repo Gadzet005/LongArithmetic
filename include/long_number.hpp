@@ -24,6 +24,7 @@ private:
     void reverseDigits();
     LongNumber removePoint() const;
     void pushZerosToStr(std::string& str, int& count) const;
+    void shiftLeft(char val);
 
     static int findDivDigit(LongNumber& num1, const LongNumber& num2);
     
